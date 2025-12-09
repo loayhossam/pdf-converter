@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تحويل الملفات لدفعة تربية</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --ios-bg: #F2F2F7;
+            --ios-blue: #007AFF;
+            --ios-card: rgba(255, 255, 255, 0.75);
+            --ios-text: #1C1C1E;
+            --ios-gray: #8E8E93;
+            --ios-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'IBM Plex Sans Arabic', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(140deg, #E0C3FC 0%, #8EC5FC 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow: hidden; /* لمنع السكرول أثناء الأنيميشن */
+        }
+
+        /* تأثير الخلفية العائمة */
+        .background-blob {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: #7a49f5;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.4;
+            top: -100px;
+            left: -100px;
+            z-index: -1;
+            animation: float 10s infinite ease-in-out;
+        }
+        .background-blob:nth-child(2) {
+            background: #4facfe;
+            bottom: -100px;
+            right: -100px;
+            top: auto;
+            left: auto;
+            animation-delay: 5s;
+        }
+
+        @keyframes float {
+            0% { transform: translate(0, 0); }
+            50% { transform: translate(30px, 30px); }
+            100% { transform: translate(0, 0); }
+        }
+
+        /* الكارد الأساسي بتصميم iOS الزجاجي */
+        .ios-card {
+            background: var(--ios-card);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 28px;
+            padding: 40px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: var(--ios-shadow);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        h1 {
+            color: var(--ios-text);
+            font-weight: 700;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        p.subtitle {
+            color: var(--ios-gray);
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        /* منطقة الرفع */
+        .upload-area {
+            background: rgba(255, 255, 255, 0.5);
+            border: 2px dashed #C7C7CC;
+            border-radius: 20px;
+            padding: 40px 20px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-area:hover, .upload-area.dragover {
+            border-color: var(--ios-blue);
+            background: rgba(0, 122, 255, 0.05);
+            transform: scale(1.02);
+        }
+
+        .icon-container {
+            font-size: 48px;
+            color: var(--ios-blue);
+            margin-bottom: 15px;
+            transition: transform 0.3s;
+        }
+
+        .upload-text {
+            color: var(--ios-text);
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .upload-subtext {
+            color: var(--ios-gray);
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        /* حالة الملف المختار */
+        .file-selected {
+            display: none;
+            margin-top: 20px;
+            background: #fff;
+            padding: 15px;
+            border-radius: 16px;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            animation: slideUp 0.4s ease;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-align: right;
+        }
+        
+        .file-icon {
+            color: #FF3B30; /* لون PDF */
+            font-size: 24px;
+        }
+
+        .file-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--ios-text);
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* الزر */
+        .ios-btn {
+            background: var(--ios-blue);
+            color: white;
+            border: none;
+            width: 100%;
+            padding: 16px;
+            border-radius: 16px;
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 25px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .ios-btn:hover {
+            background: #0063ce;
+            transform: translateY(-2px);
+        }
+
+        .ios-btn:active {
+            transform: scale(0.98);
+        }
+
+        .ios-btn:disabled {
+            background: #C7C7CC;
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* رسائل الخطأ */
+        .error-message {
+            color: #FF3B30;
+            font-size: 13px;
+            margin-top: 15px;
+            display: none;
+            animation: shake 0.4s ease-in-out;
+        }
+
+        /* اللودر */
+        .loader {
+            width: 20px;
+            height: 20px;
+            border: 3px solid #fff;
+            border-bottom-color: transparent;
+            border-radius: 50%;
+            display: inline-block;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+            display: none;
+        }
+
+        @keyframes rotation {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* تذييل الصفحة */
+        .footer {
+            margin-top: 25px;
+            font-size: 12px;
+            color: var(--ios-gray);
+        }
+        
+    </style>
+</head>
+<body>
+
+    <div class="background-blob"></div>
+    <div class="background-blob"></div>
+
+    <div class="ios-card">
+        <div style="background: white; width: 60px; height: 60px; border-radius: 18px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.08);">
+            <i class="fas fa-magic" style="font-size: 24px; color: var(--ios-blue);"></i>
+        </div>
+
+        <h1>تحويل الملفات لدفعة تربية</h1>
+        <p class="subtitle">حماية المحتوى وتحويل PDF إلى عرض تقديمي غير قابل للتعديل</p>
+
+        <form id="uploadForm">
+            <div class="upload-area" id="dropZone">
+                <div class="icon-container">
+                    <i class="fas fa-cloud-arrow-up"></i>
+                </div>
+                <div class="upload-text">اضغط أو اسحب الملف هنا</div>
+                <div class="upload-subtext">ملفات PDF فقط (الحد الأقصى 16 ميجا)</div>
+                <input type="file" id="fileInput" accept=".pdf" style="display: none;">
+            </div>
+
+            <div class="file-selected" id="fileSelected">
+                <div class="file-info">
+                    <i class="fas fa-file-pdf file-icon"></i>
+                    <span class="file-name" id="fileName">اسم الملف.pdf</span>
+                </div>
+                <i class="fas fa-times-circle" style="color: #C7C7CC; cursor: pointer;" onclick="resetFile()"></i>
+            </div>
+
+            <div class="error-message" id="errorMsg"></div>
+
+            <button type="submit" class="ios-btn" id="convertBtn" disabled>
+                <span class="btn-text">بدء التحويل</span>
+                <span class="loader" id="loader"></span>
+            </button>
+        </form>
+
+        <div class="footer">
+            تصميم خاص لدفعة تربية • آمن وسريع
+        </div>
+    </div>
+
+    <script>
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const fileSelected = document.getElementById('fileSelected');
+        const fileNameSpan = document.getElementById('fileName');
+        const convertBtn = document.getElementById('convertBtn');
+        const loader = document.getElementById('loader');
+        const btnText = document.querySelector('.btn-text');
+        const errorMsg = document.getElementById('errorMsg');
+        const uploadForm = document.getElementById('uploadForm');
+        let selectedFile = null;
+
+        // التعامل مع النقر والسحب
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0]);
+        });
+
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length) handleFile(fileInput.files[0]);
+        });
+
+        function handleFile(file) {
+            if (file.type !== 'application/pdf') {
+                showError('عفواً، يرجى رفع ملفات بصيغة PDF فقط');
+                return;
+            }
+            selectedFile = file;
+            fileNameSpan.textContent = file.name;
+            
+            // تغيير واجهة المستخدم
+            dropZone.style.display = 'none';
+            fileSelected.style.display = 'flex';
+            convertBtn.disabled = false;
+            errorMsg.style.display = 'none';
+        }
+
+        function resetFile() {
+            selectedFile = null;
+            fileInput.value = '';
+            dropZone.style.display = 'block';
+            fileSelected.style.display = 'none';
+            convertBtn.disabled = true;
+            errorMsg.style.display = 'none';
+        }
+
+        function showError(msg) {
+            errorMsg.textContent = msg;
+            errorMsg.style.display = 'block';
+        }
+
+        uploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!selectedFile) return;
+
+            // تفعيل حالة التحميل
+            convertBtn.disabled = true;
+            btnText.textContent = 'جاري المعالجة...';
+            loader.style.display = 'inline-block';
+            
+            const formData = new FormData();
+            formData.append('file', selectedFile);
+
+            try {
+                const response = await fetch('/convert', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = selectedFile.name.replace('.pdf', '_محول.pptx');
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+
+                    // إعادة الوضع الطبيعي بعد النجاح
+                    btnText.textContent = 'تم التحميل بنجاح!';
+                    loader.style.display = 'none';
+                    setTimeout(() => {
+                        resetFile();
+                        btnText.textContent = 'بدء التحويل';
+                    }, 3000);
+                } else {
+                    const result = await response.json();
+                    showError(result.error || 'حدث خطأ أثناء التحويل');
+                    resetBtnState();
+                }
+            } catch (error) {
+                showError('فشل الاتصال بالخادم');
+                resetBtnState();
+            }
+        });
+
+        function resetBtnState() {
+            convertBtn.disabled = false;
+            btnText.textContent = 'بدء التحويل';
+            loader.style.display = 'none';
+        }
+    </script>
+</body>
+</html>
